@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kaçan Balık Pro | Premium Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --lg-red: #a50034; 
+            --lg-dark-red: #820029;
+            --premium-gray: #f8f9fa;
+            --text-main: #222;
+            --text-sub: #666;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-lg: 0 15px 40px rgba(165,0,52,0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--premium-gray); color: var(--text-main); padding-bottom: 80px; letter-spacing: -0.02em; }
+        body::before { content: ''; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; height: 350px; background: url('https://upload.wikimedia.org/wikipedia/commons/8/8d/LG_logo_%282014%29.svg') no-repeat center; background-size: contain; opacity: 0.04; z-index: -1; pointer-events: none; }
+
+        header { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); padding: 18px 20px; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-sm); border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; }
+        header .logo-container { display: flex; align-items: center; gap: 12px; }
+        header img { width: 42px; height: auto; } 
+        header .divider { height: 24px; width: 1.5px; background-color: #ddd; }
+        header .app-title { font-size: 1.15rem; font-weight: 800; color: #111; letter-spacing: -0.04em; }
+        header .app-title span { color: var(--lg-red); }
+
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+
+        .main-ciro-card {
+            background: linear-gradient(135deg, var(--lg-red) 0%, var(--lg-dark-red) 100%);
+            color: white; border-radius: 24px; padding: 30px; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; margin-bottom: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .ciro-split { display: flex; width: 100%; justify-content: space-around; align-items: center; margin-top: 10px; }
+        .ciro-item { text-align: center; }
+        .stat-label-main { color: rgba(255,255,255,0.75); text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; display: block; margin-bottom: 5px; }
+        .stat-value-main { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.05em; }
+        .stat-value-sub { font-size: 1.8rem; font-weight: 700; }
+        .lifes-good-footer { position: absolute; bottom: 8px; right: 15px; font-size: 1.1rem; font-weight: 300; font-style: italic; color: rgba(255, 255, 255, 0.15); }
+
+        .premium-nav { background: #eee; border-radius: 50px; padding: 4px; display: flex; margin-bottom: 25px; border: 1px solid #e0e0e0; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; border-radius: 50px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #777; transition: var(--transition); }
+        .nav-item.active { background-color: var(--lg-red); color: white; box-shadow: 0 4px 12px rgba(165,0,52,0.25); }
+
+        .card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.03); }
+        .card h3 { font-size: 1.05rem; font-weight: 800; margin: 0 0 20px 0; color: #111; display: flex; align-items: center; gap: 10px; }
+        .card h3::before { content: ''; width: 5px; height: 18px; background: var(--lg-red); border-radius: 10px; }
+
+        label { display: block; margin-top: 15px; font-weight: 800; font-size: 0.65rem; color: #444; text-transform: uppercase; letter-spacing: 0.05em; }
+        input, select, textarea { width: 100%; padding: 14px 16px; margin-top: 6px; border: 1.5px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; font-family: inherit; background-color: #fcfcfc; }
+        input:focus { outline: none; border-color: var(--lg-red); background-color: white; }
+
+        .btn-save { background: linear-gradient(to right, var(--lg-red), var(--lg-dark-red)); color: white; border: none; flex: 2; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: var(--transition); text-transform: uppercase; }
+        .btn-cancel { background: #eee; color: #777; border: none; flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: var(--transition); text-transform: uppercase; display: none; }
+
+        .loss-row { background: #fff; border: 1px solid #f0f0f0; border-radius: 18px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .loss-model { font-weight: 800; color: #111; font-size: 1rem; }
+        .loss-reason { font-size: 0.65rem; color: var(--lg-red); font-weight: 800; text-transform: uppercase; }
+        .loss-note { font-size: 0.8rem; color: #666; margin-top: 5px; }
+        .loss-price { font-size: 1.05rem; font-weight: 800; color: #111; }
+        .loss-img-preview { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; margin-top: 8px; cursor: pointer; border: 1px solid #eee; transition: transform 0.2s; }
+        .loss-img-preview:hover { transform: scale(1.05); }
+
+        .hidden { display: none !important; }
+        .filter-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .small-select { padding: 8px; font-size: 0.7rem; font-weight: 800; border-radius: 8px; border: 1.5px solid #eee; background: white; }
+
+        .reason-detail-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .reason-detail-item:last-child { border-bottom: none; }
+        .reason-name { font-size: 0.75rem; font-weight: 800; color: #444; text-transform: uppercase; letter-spacing: 0.02em; }
+        .reason-stats { text-align: right; }
+        .reason-count { font-size: 0.7rem; color: var(--lg-red); font-weight: 700; margin-right: 8px; }
+        .reason-amount { font-size: 0.85rem; font-weight: 800; color: #111; }
+
+        .chart-legend-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.65rem; font-weight: 700; color: #555; text-transform: uppercase; }
+        .legend-color { width: 10px; height: 10px; border-radius: 3px; }
+
+        .file-upload-label {
+            display: flex; align-items: center; gap: 8px; background: #f0f0f0; padding: 10px; border-radius: 10px; cursor: pointer;
+            font-size: 0.75rem; font-weight: 700; color: #555; margin-top: 10px; transition: var(--transition);
+        }
+        .file-upload-label:hover { background: #e5e5e5; }
+        #img-preview-box { width: 60px; height: 60px; border-radius: 10px; margin-top: 10px; display: none; object-fit: cover; border: 2px solid var(--lg-red); cursor: pointer; }
+
+        /* MODAL / LIGHTBOX CSS */
+        .lightbox {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px);
+            justify-content: center; align-items: center;
+        }
+        .lightbox img { max-width: 90%; max-height: 80%; border-radius: 12px; box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 3px solid white; }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/LG_logo_%282014%29.svg">
+        <div class="divider"></div>
+        <div class="app-title">LG KAÇAN <span>BALIK PRO</span></div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="main-ciro-card">
+        <span class="stat-label-main">Seçili Dönem Özeti</span>
+        <div class="ciro-split">
+            <div class="ciro-item">
+                <span class="stat-label-main">TOPLAM KAYIP</span>
+                <div id="total-loss-val" class="stat-value-main">0 ₺</div>
+            </div>
+            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.2);"></div>
+            <div class="ciro-item">
+                <span class="stat-label-main">ADET</span>
+                <div id="total-loss-count" class="stat-value-sub">0</div>
+            </div>
+        </div>
+        <div class="lifes-good-footer">Life's Good</div>
+    </div>
+
+    <div class="premium-nav">
+        <div id="tab-takip" class="nav-item active" onclick="showTab('takip')">YENİ KAYIT</div>
+        <div id="tab-analiz" class="nav-item" onclick="showTab('analiz')">AYLIK ARŞİV</div>
+    </div>
+
+    <div id="takip-section">
+        <div class="card">
+            <h3 id="form-title">Kayıp Veri Girişi</h3>
+            <input type="hidden" id="edit-id">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>KAYIT TARİHİ</label>
+                    <input type="date" id="m-date">
+                </div>
+                <div>
+                    <label>KAÇMA NEDENİ</label>
+                    <select id="m-reason">
+                        <option value="Stok Yok">LG Stoklarında Yok</option>
+                        <option value="Rakip Fiyat">Rakip Fiyat Avantajı</option>
+                        <option value="Fiyat Farkı">Mağaza Fiyat Farkı</option>
+                        <option value="Özellik">Eksik Özellik</option>
+                        <option value="Diğer">Diğer</option>
+                    </select>
+                </div>
+            </div>
+            <label>Model / Ekran Bilgisi</label>
+            <input type="text" id="m-model" placeholder="Örn: 65G4 OLED TV">
+            <label>Tahmini Kayıp Tutarı</label>
+            <input type="text" id="m-price" placeholder="0 ₺" oninput="formatMoney(this)">
+            
+            <label>Açıklama / Müşteri Notu</label>
+            <textarea id="m-note" rows="2" placeholder="Neden almadı?"></textarea>
+            
+            <label class="file-upload-label">
+                <span>📸 Fotoğraf Ekle (İsteğe Bağlı)</span>
+                <input type="file" id="m-img" accept="image/*" style="display:none" onchange="previewImage(this)">
+            </label>
+            <img id="img-preview-box" onclick="openLightbox(this.src)">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-cancel" id="cancel-btn" onclick="resetForm()">VAZGEÇ</button>
+                <button class="btn-save" id="save-btn" onclick="saveLoss()">SİSTEME İŞLE</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-direction: column; gap: 10px;">
+                <h3 style="margin:0">Kayıp Listesi</h3>
+                <div class="filter-group">
+                    <select id="filter-days" onchange="render()" class="small-select">
+                        <option value="3">SON 3 GÜN</option>
+                        <option value="15">SON 15 GÜN</option>
+                        <option value="30">BU AY</option>
+                        <option value="custom">ÖZEL GÜN -> </option>
+                    </select>
+                    <input type="date" id="custom-day-filter" onchange="render()" class="small-select" style="margin-top:0; width: auto; height: 32px; padding: 0 5px;">
+                </div>
+            </div>
+            <div id="loss-list"></div>
+        </div>
+    </div>
+
+    <div id="analiz-section" class="hidden">
+        <div class="card">
+            <h3>Dönem ve Neden Analizi</h3>
+            <label>GÖRÜNTÜLENECEK AY</label>
+            <input type="month" id="analiz-month-select" onchange="renderAnaliz()">
+            
+            <div style="height: 180px; margin-top:20px; display: flex; justify-content: center;">
+                <canvas id="reasonChart"></canvas>
+            </div>
+            <div id="chart-legends" class="chart-legend-container"></div>
+            <div id="reason-stats-details" style="margin-top: 25px; border-top: 1.5px solid #eee; padding-top: 15px;"></div>
+        </div>
+
+        <div class="card">
+            <h3 id="analiz-list-title">Ay Detay Listesi</h3>
+            <div id="analiz-list-container"></div>
+        </div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="">
+</div>
+
+<script>
+    let losses = JSON.parse(localStorage.getItem('lg_kacan_balik_pro_v3')) || [];
+    let reasonChart = null;
+    let currentBase64Img = ""; 
+    const palette = ['#a50034', '#005a9c', '#f1c40f', '#27ae60', '#8e44ad', '#e67e22', '#16a085'];
+
+    document.getElementById('m-date').valueAsDate = new Date();
+    document.getElementById('analiz-month-select').value = new Date().toISOString().slice(0, 7);
+
+    // Lightbox Fonksiyonları
+    function openLightbox(src) {
+        if(!src) return;
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox').style.display = "flex";
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').style.display = "none";
+    }
+
+    function formatMoney(el) {
+        let val = el.value.replace(/\D/g, "");
+        el.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentBase64Img = e.target.result;
+                const preview = document.getElementById('img-preview-box');
+                preview.src = currentBase64Img;
+                preview.style.display = "block";
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function showTab(t) {
+        document.getElementById('takip-section').classList.toggle('hidden', t !== 'takip');
+        document.getElementById('analiz-section').classList.toggle('hidden', t !== 'analiz');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.id === 'tab-'+t));
+        if(t === 'analiz') renderAnaliz(); else render();
+    }
+
+    function saveLoss() {
+        const model = document.getElementById('m-model').value;
+        const reason = document.getElementById('m-reason').value;
+        const price = document.getElementById('m-price').value.replace(/\./g, "");
+        const note = document.getElementById('m-note').value;
+        const date = document.getElementById('m-date').value;
+        const id = document.getElementById('edit-id').value;
+        
+        if(!model || !price || !date) return alert("Eksik bilgi!");
+        
+        if(id) {
+            let idx = losses.findIndex(l => l.id == id);
+            losses[idx] = { ...losses[idx], model, reason, price: parseInt(price), note, date, img: currentBase64Img || losses[idx].img };
+        } else {
+            losses.push({ id: Date.now(), model, reason, price: parseInt(price), note, date, img: currentBase64Img });
+        }
+        localStorage.setItem('lg_kacan_balik_pro_v3', JSON.stringify(losses));
+        resetForm(); render();
+    }
+
+    function resetForm() {
+        document.getElementById('m-model').value = ""; document.getElementById('m-price').value = "";
+        document.getElementById('m-note').value = ""; document.getElementById('edit-id').value = "";
+        document.getElementById('img-preview-box').style.display = "none";
+        document.getElementById('m-img').value = "";
+        currentBase64Img = "";
+        document.getElementById('m-date').valueAsDate = new Date();
+        document.getElementById('form-title').innerText = "Kayıp Veri Girişi";
+        document.getElementById('save-btn').innerText = "SİSTEME İŞLE";
+        document.getElementById('cancel-btn').style.display = "none";
+    }
+
+    function render() {
+        const filterType = document.getElementById('filter-days').value;
+        const customDate = document.getElementById('custom-day-filter').value;
+        const now = new Date();
+        let filtered = losses;
+        if(filterType === 'custom' && customDate) {
+            filtered = losses.filter(l => l.date === customDate);
+        } else {
+            const days = parseInt(filterType);
+            filtered = losses.filter(l => {
+                let diff = (now - new Date(l.date)) / (1000*60*60*24);
+                return diff <= days;
+            });
+        }
+        document.getElementById('total-loss-val').innerText = filtered.reduce((a, b) => a + b.price, 0).toLocaleString('tr-TR') + " ₺";
+        document.getElementById('total-loss-count').innerText = filtered.length;
+        
+        document.getElementById('loss-list').innerHTML = filtered.sort((a,b) => b.id - a.id).map(l => `
+            <div class="loss-row">
+                <div style="flex:1">
+                    <span class="loss-reason">${l.reason}</span>
+                    <div class="loss-model">${l.model}</div>
+                    <div class="loss-note">${l.note || '-'}</div>
+                    ${l.img ? `<img src="${l.img}" class="loss-img-preview" onclick="openLightbox('${l.img}')">` : ''}
+                    <div style="font-size:0.7rem; color:#bbb; margin-top:5px; font-weight:700">${l.date.split('-').reverse().join('.')}</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="loss-price">${l.price.toLocaleString('tr-TR')} ₺</div>
+                    <div style="margin-top:8px; display:flex; gap:8px; justify-content:flex-end">
+                        <span onclick="editLoss(${l.id})" style="color:#3498db; font-size:0.65rem; font-weight:800; cursor:pointer">DÜZENLE</span>
+                        <span onclick="deleteLoss(${l.id})" style="color:#e74c3c; font-size:0.65rem; font-weight:800; cursor:pointer">SİL</span>
+                    </div>
+                </div>
+            </div>
+        `).join('') || '<p style="text-align:center; color:#ccc; padding:20px;">Kayıt bulunamadı.</p>';
+    }
+
+    function editLoss(id) {
+        let l = losses.find(x => x.id == id);
+        document.getElementById('m-model').value = l.model;
+        document.getElementById('m-reason').value = l.reason;
+        document.getElementById('m-price').value = l.price.toLocaleString('tr-TR');
+        document.getElementById('m-note').value = l.note;
+        document.getElementById('m-date').value = l.date;
+        document.getElementById('edit-id').value = l.id;
+        if(l.img) {
+            document.getElementById('img-preview-box').src = l.img;
+            document.getElementById('img-preview-box').style.display = "block";
+            currentBase64Img = l.img;
+        } else {
+            document.getElementById('img-preview-box').style.display = "none";
+        }
+        document.getElementById('form-title').innerText = "Kaydı Düzenle";
+        document.getElementById('save-btn').innerText = "GÜNCELLEMEYİ KAYDET";
+        document.getElementById('cancel-btn').style.display = "block";
+        window.scrollTo({top: 100, behavior: 'smooth'});
+    }
+
+    function deleteLoss(id) {
+        if(confirm("Silinsin mi?")) {
+            losses = losses.filter(l => l.id != id);
+            localStorage.setItem('lg_kacan_balik_pro_v3', JSON.stringify(losses));
+            render();
+        }
+    }
+
+    function renderAnaliz() {
+        const month = document.getElementById('analiz-month-select').value;
+        const filtered = losses.filter(l => l.date.startsWith(month));
+        const sum = filtered.reduce((a, b) => a + b.price, 0);
+        document.getElementById('total-loss-val').innerText = sum.toLocaleString('tr-TR') + " ₺";
+        document.getElementById('total-loss-count').innerText = filtered.length;
+
+        document.getElementById('analiz-list-container').innerHTML = filtered.sort((a,b) => b.id - a.id).map(l => `
+            <div class="loss-row" style="background:#fcfcfc; border-left:4px solid var(--lg-red)">
+                <div style="flex:1">
+                    <span class="loss-reason">${l.reason}</span>
+                    <div class="loss-model">${l.model}</div>
+                    <div class="loss-note" style="font-style:italic">${l.note || '-'}</div>
+                    ${l.img ? `<img src="${l.img}" class="loss-img-preview" onclick="openLightbox('${l.img}')">` : ''}
+                    <div style="font-size:0.7rem; color:#999; margin-top:5px; font-weight:700">${l.date.split('-').reverse().join('.')}</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="loss-price">${l.price.toLocaleString('tr-TR')} ₺</div>
+                </div>
+            </div>
+        `).join('') || '<p style="text-align:center; padding:20px;">Kayıt yok.</p>';
+
+        const stats = {};
+        filtered.forEach(l => {
+            if(!stats[l.reason]) stats[l.reason] = { count: 0, amount: 0 };
+            stats[l.reason].count++;
+            stats[l.reason].amount += l.price;
+        });
+        
+        const labels = Object.keys(stats);
+        const chartColors = labels.map((_, i) => palette[i % palette.length]);
+        if(reasonChart) reasonChart.destroy();
+        const ctx = document.getElementById('reasonChart').getContext('2d');
+        reasonChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: Object.values(stats).map(s => s.count),
+                    backgroundColor: chartColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, cutout: '70%' }
+        });
+
+        document.getElementById('chart-legends').innerHTML = labels.map((name, i) => `
+            <div class="legend-item">
+                <div class="legend-color" style="background:${chartColors[i]}"></div>
+                ${name}
+            </div>
+        `).join('');
+
+        document.getElementById('reason-stats-details').innerHTML = Object.entries(stats).map(([name, data]) => `
+            <div class="reason-detail-item">
+                <span class="reason-name">${name}</span>
+                <div class="reason-stats">
+                    <span class="reason-count">${data.count} ADET</span>
+                    <span class="reason-amount">${data.amount.toLocaleString('tr-TR')} ₺</span>
+                </div>
+            </div>
+        `).join('') || '<p style="text-align:center; font-size:0.7rem; color:#999;">Veri bulunamadı.</p>';
+    }
+
+    window.onload = render;
+</script>
+</body>
+</html>
